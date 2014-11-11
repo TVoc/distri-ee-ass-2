@@ -5,10 +5,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import rental.interfaces.ICar;
 
 @Entity
-public class Car implements Serializable {
+public class Car implements ICar, Serializable {
     private int id;
     
     private CarType type;
@@ -31,9 +35,27 @@ public class Car implements Serializable {
      * ID *
      * @return 
      ******/
-    @Id
+    
+    @Override
     public int getId() {
     	return id;
+    }
+    
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    private long dbId;
+    
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    public long getDbId() {
+        return this.dbId;
+    }
+    
+    public void setDbId(long dbId) {
+        this.dbId = dbId;
     }
     
     /************
@@ -41,6 +63,7 @@ public class Car implements Serializable {
      * @return 
      ************/
     
+    @Override
     public CarType getType() {
         return type;
     }
@@ -49,6 +72,7 @@ public class Car implements Serializable {
      * RESERVATIONS *
      ****************/
 
+    @Override
     public boolean isAvailable(Date start, Date end) {
         if(!start.before(end))
             throw new IllegalArgumentException("Illegal given period");
@@ -61,16 +85,29 @@ public class Car implements Serializable {
         return true;
     }
     
+    @Override
     public void addReservation(Reservation res) {
         reservations.add(res);
     }
     
+    @Override
     public void removeReservation(Reservation reservation) {
         // equals-method for Reservation is required!
         reservations.remove(reservation);
     }
 
+    @OneToMany
     public Set<Reservation> getReservations() {
         return reservations;
+    }
+    
+    @Override
+    public void setReservations(Set<Reservation> reservations) {
+        this.reservations = reservations;
+    }
+    
+    @Override
+    public int getNumReservations() {
+        return this.getReservations().size();
     }
 }

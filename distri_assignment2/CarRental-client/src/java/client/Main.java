@@ -1,9 +1,13 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import javax.naming.InitialContext;
+import rental.Car;
 import rental.CarType;
+import rental.RentalStore;
 import rental.ReservationConstraints;
 import session.CarRentalSessionRemote;
 import session.ManagerSessionRemote;
@@ -15,8 +19,13 @@ public class Main extends AbstractScriptedTripTest<CarRentalSessionRemote, Manag
     }
 
     public static void main(String[] args) throws Exception {
-        //TODO: use updated manager interface to load cars into companies
-        new Main("trips").run();
+        Main main = new Main("trips");
+        ManagerSessionRemote ms = main.getNewManagerSession("manager", "company");
+        List<Car> dockxCars = RentalStore.loadData("dockx.csv");
+        List<Car> hertzCars = RentalStore.loadData("hertz.csv");
+        ms.addCarRentalCompany("Dockx", dockxCars);
+        ms.addCarRentalCompany("Hertz", hertzCars);
+        main.run();
     }
     
     @Override
@@ -62,19 +71,16 @@ public class Main extends AbstractScriptedTripTest<CarRentalSessionRemote, Manag
 
     @Override
     protected CarType getMostPopularCarTypeIn(ManagerSessionRemote ms, String carRentalCompanyName) throws Exception {
-        System.err.println("To be implemented.");
-        return null;
+        return ms.getMostPopularCarTypeIn(carRentalCompanyName);
     }
 
     @Override
     protected Set<String> getBestClients(ManagerSessionRemote ms) throws Exception {
-        System.err.println("To be implemented.");
-        return null;
+        return ms.getBestClients();
     }
 
     @Override
     protected String getCheapestCarType(CarRentalSessionRemote session, Date start, Date end) throws Exception {
-        System.err.println("To be implemented.");
-        return null;
+        return session.getCheapestCarType(start, end);
     }
 }

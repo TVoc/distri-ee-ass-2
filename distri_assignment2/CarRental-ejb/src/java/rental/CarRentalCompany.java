@@ -1,6 +1,6 @@
 package rental;
 
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,16 +9,28 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.EntityManager;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PersistenceContext;
+import rental.interfaces.ICarRentalCompany;
 
 
 @Entity
-public class CarRentalCompany {    
+public class CarRentalCompany implements Serializable, ICarRentalCompany {    
+    
+    @PersistenceContext(unitName="CarRental-ejbPU")
+    private EntityManager em;
+    
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
+    
+    @Id
     private String name;
+    
+    @OneToMany
     private List<Car> cars;
+    
+    @OneToMany
     private Set<CarType> carTypes = new HashSet<CarType>();
 
     /***************
@@ -33,6 +45,8 @@ public class CarRentalCompany {
         this.cars = cars;
         for (Car car : cars) {
             carTypes.add(car.getType());
+            em.merge(car.getType());
+            em.persist(car);
         }
     }
 
@@ -40,30 +54,31 @@ public class CarRentalCompany {
      * NAME *
      ********/
     
+    @Override
     public String getName() {
         return name;
     }
 
-    private void setName(String name) {
+    @Override
+    public void setName(String name) {
         this.name = name;
     }
-    
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    public long getId() {
-        return id;
-    }
-    
-    private long id;
 
     /*************
      * CAR TYPES *
      *************/
     
-    public Collection<CarType> getAllTypes() {
+    @Override
+    public Set<CarType> getAllTypes() {
         return carTypes;
     }
 
+    @Override
+    public void setAllTypes(Set<CarType> carTypes) {
+        this.carTypes = carTypes;
+    }
+    
+    @Override
     public CarType getType(String carTypeName) {
         for(CarType type:carTypes){
             if(type.getName().equals(carTypeName))
@@ -72,11 +87,13 @@ public class CarRentalCompany {
         throw new IllegalArgumentException("<" + carTypeName + "> No cartype of name " + carTypeName);
     }
 
+    @Override
     public boolean isAvailable(String carTypeName, Date start, Date end) {
         logger.log(Level.INFO, "<{0}> Checking availability for car type {1}", new Object[]{name, carTypeName});
         return getAvailableCarTypes(start, end).contains(getType(carTypeName));
     }
 
+    @Override
     public Set<CarType> getAvailableCarTypes(Date start, Date end) {
         Set<CarType> availableCarTypes = new HashSet<CarType>();
         for (Car car : cars) {
@@ -91,6 +108,7 @@ public class CarRentalCompany {
      * CARS *
      *********/
     
+    @Override
     public Car getCar(int uid) {
         for (Car car : cars) {
             if (car.getId() == uid) {
@@ -100,6 +118,7 @@ public class CarRentalCompany {
         throw new IllegalArgumentException("<" + name + "> No car with uid " + uid);
     }
 
+    @Override
     public Set<Car> getCars(CarType type) {
         Set<Car> out = new HashSet<Car>();
         for (Car car : cars) {
@@ -110,6 +129,7 @@ public class CarRentalCompany {
         return out;
     }
     
+    @Override
      public Set<Car> getCars(String type) {
         Set<Car> out = new HashSet<Car>();
         for (Car car : cars) {
@@ -129,11 +149,21 @@ public class CarRentalCompany {
         }
         return availableCars;
     }
+    
+    @Override
+    public List<Car> getCars() {
+        return this.cars;
+    }
+    
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
 
     /****************
      * RESERVATIONS *
      ****************/
     
+    @Override
     public Quote createQuote(ReservationConstraints constraints, String guest)
             throws ReservationException {
         logger.log(Level.INFO, "<{0}> Creating tentative reservation for {1} with constraints {2}",
@@ -157,6 +187,7 @@ public class CarRentalCompany {
                 / (1000 * 60 * 60 * 24D));
     }
 
+    @Override
     public Reservation confirmQuote(Quote quote) throws ReservationException {
         logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
         List<Car> availableCars = getAvailableCars(quote.getCarType(), quote.getStartDate(), quote.getEndDate());
@@ -171,11 +202,13 @@ public class CarRentalCompany {
         return res;
     }
 
+    @Override
     public void cancelReservation(Reservation res) {
         logger.log(Level.INFO, "<{0}> Cancelling reservation {1}", new Object[]{name, res.toString()});
         getCar(res.getCarId()).removeReservation(res);
     }
     
+    @Override
     public Set<Reservation> getReservationsBy(String renter) {
         logger.log(Level.INFO, "<{0}> Retrieving reservations by {1}", new Object[]{name, renter});
         Set<Reservation> out = new HashSet<Reservation>();
@@ -186,5 +219,17 @@ public class CarRentalCompany {
             }
         }
         return out;
+    }
+    
+    @Override
+    public int getNumReservationsForType(String type) {
+        int count = 0;
+        CarType carType = this.getType(type);
+        for (Car car : cars) {
+            if (car.getType().equals(carType)) {
+                count += car.getNumReservations();
+            }
+        }
+        return count;
     }
 }

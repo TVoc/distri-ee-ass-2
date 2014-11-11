@@ -10,3 +10,10 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/distri_assignment2/CarRental-ejb/build/
+/distri_assignment2/CarRental-lib/dist/
+/distri_assignment2/CarRental/build/
+/distri_assignment2/CarRental/dist/
+/distri_assignment2/CarRental-client/build/
+/distri_assignment2/CarRental-client/dist/
+/distri_assignment2/CarRental-ejb/dist/

@@ -36,6 +36,10 @@ public class Reservation extends Quote {
         return id;
     }
     
+    public void setId(long id) {
+        this.id = id;
+    }
+    
     private long id;
     
     /*************

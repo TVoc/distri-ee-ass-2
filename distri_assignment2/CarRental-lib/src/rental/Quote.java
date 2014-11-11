@@ -3,6 +3,8 @@ package rental;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @MappedSuperclass
 public class Quote implements Serializable {
@@ -29,28 +31,54 @@ public class Quote implements Serializable {
         this.rentalPrice = rentalPrice;
     }
 
+    @Temporal(TemporalType.DATE)
     public Date getStartDate() {
         return startDate;
     }
+    
+    public void setStartDate(Date start) {
+        this.startDate = start;
+    }
 
+    @Temporal(TemporalType.DATE)
     public Date getEndDate() {
         return endDate;
+    }
+    
+    public void setEndDate(Date end) {
+        this.endDate = end;
     }
 
     public String getCarRenter() {
         return carRenter;
     }
+    
+    public void setCarRenter(String renter) {
+        this.carRenter = renter;
+    }
 
     public String getRentalCompany() {
         return rentalCompany;
+    }
+    
+    public void setRentalCompany(String company) {
+        this.rentalCompany = company;
     }
 
     public double getRentalPrice() {
         return rentalPrice;
     }
     
+    public void setRentalPrice(double price) {
+        this.rentalPrice = price;
+    }
+    
     public String getCarType() {
 	return carType;
+    }
+    
+    public void setCarType(String carType) {
+        this.carType = carType;
     }
     
     /*************
