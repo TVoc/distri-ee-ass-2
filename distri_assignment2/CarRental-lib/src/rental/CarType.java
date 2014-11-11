@@ -114,6 +114,7 @@ public class CarType implements Serializable {
         final int prime = 31;
 	int result = 1;
 	result = prime * result + ((name == null) ? 0 : name.hashCode());
+	result = prime * result + ((id == 0) ? 0 : new Long(id).intValue());
 	return result;
     }
 
@@ -129,8 +130,11 @@ public class CarType implements Serializable {
 	if (name == null) {
             if (other.name != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!name.equals(other.name)) {
             return false;
+        } else if (id != other.id) {
+            return false;
+        }
 	return true;
     }
 }

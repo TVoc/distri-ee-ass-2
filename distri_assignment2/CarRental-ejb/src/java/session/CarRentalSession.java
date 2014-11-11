@@ -41,27 +41,52 @@ public class CarRentalSession implements CarRentalSessionRemote {
     
     @Override
     public List<CarType> getAvailableCarTypes(Date start, Date end) {
-        String queryString = "SELECT t FROM CarType t WHERE NOT EXISTS"
+        String companyQString = "SELECT c FROM CarRentalCompany c";
+        TypedQuery<CarRentalCompany> cQuery = em.createQuery(companyQString, CarRentalCompany.class);
+        List<CarRentalCompany> companies = cQuery.getResultList();
+        
+        List<CarType> toReturn = new ArrayList<CarType>();
+        
+        for (CarRentalCompany company : companies) {
+            String queryString = "SELECT t FROM CarType t WHERE EXISTS (SELECT comp FROM CarRentalCompany comp WHERE comp = :company AND t MEMBER OF comp.carTypes AND EXISTS"
+                    + " (SELECT c FROM Car c WHERE c MEMBER OF comp.cars AND c.type = t AND NOT EXISTS (SELECT r FROM Reservation r WHERE r.carId = c.id AND (:start < r.endDate OR :end > r.startDate))))";
+            TypedQuery<CarType> query = em.createQuery(queryString, CarType.class);
+            query.setParameter("start", start, TemporalType.DATE);
+            query.setParameter("end", end, TemporalType.DATE);
+            query.setParameter("company", company);
+            toReturn.addAll(query.getResultList());
+        }
+        
+        return toReturn;
+        /*String queryString = "SELECT t FROM CarType t WHERE NOT EXISTS"
                 + " (SELECT r FROM Reservation r WHERE r.carType = t.name AND NOT"
-                + " (:end <= r.startDate OR :start >= r.endDate))";
+                + " (:end < r.startDate OR :start > r.endDate))";
         TypedQuery<CarType> query = em.createQuery(queryString, CarType.class);
         query.setParameter("start", start, TemporalType.DATE);
         query.setParameter("end", end, TemporalType.DATE);
-        return query.getResultList();
+        return query.getResultList();*/
     }
     
     @Override
     public String getCheapestCarType(Date start, Date end) {
         List<CarType> available = this.getAvailableCarTypes(start, end);
+        
         if (available.isEmpty()) {
             return "";
         }
+        
+        for(CarType type : available) {
+            System.out.println("Candidate for cheapest: " + type);
+        }
+        
         CarType cheapest = null;
+        
         for (CarType type : available) {
-            if (cheapest == null || type.getRentalPricePerDay() < cheapest.getRentalPricePerDay()) {
+            if (cheapest == null || (type.getRentalPricePerDay() < cheapest.getRentalPricePerDay())) {
                 cheapest = type;
             }
         }
+        
         return cheapest.getName();
     }
 
