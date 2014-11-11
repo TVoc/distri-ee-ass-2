@@ -67,11 +67,11 @@ public class ManagerSession implements ManagerSessionRemote {
             String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
                     + " r.rentalCompany = :company AND r.carType = :type AND"
                     + " r.carId = :id";
-            TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+            TypedQuery<Long> query = em.createQuery(queryString, Long.class);
             query.setParameter("company", company);
             query.setParameter("type", type);
             query.setParameter("id", id);
-            return query.getFirstResult();
+            return query.getSingleResult().intValue();
             //return RentalStore.getRental(company).getCar(id).getReservations().size();
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
@@ -84,10 +84,10 @@ public class ManagerSession implements ManagerSessionRemote {
         try {
             String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
                     + " r.carType = :type AND r.rentalCompany = :company";
-            TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+            TypedQuery<Long> query = em.createQuery(queryString, Long.class);
             query.setParameter("type", type);
             query.setParameter("company", company);
-            return query.getFirstResult();
+            return query.getSingleResult().intValue();
             /*for(Car c: RentalStore.getRental(company).getCars(type)){
                 out.addAll(c.getReservations());
             }*/
@@ -101,8 +101,9 @@ public class ManagerSession implements ManagerSessionRemote {
     public int getNumberOfReservationsBy(String renter) {
         String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
                 + " r.carRenter = :renter";
-        TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
-        return query.getFirstResult();
+        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+        query.setParameter("renter", renter);
+        return query.getSingleResult().intValue();
     }
     
     @Override
@@ -129,18 +130,18 @@ public class ManagerSession implements ManagerSessionRemote {
     @Override
     public int getNumReservationsForType(String company, String type) {
         String queryString = "SELECT COUNT(r) FROM Reservation r WHERE r.rentalCompany = :company AND r.carType = :type";
-        TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
         query.setParameter("company", company);
         query.setParameter("type", type);
-        return query.getFirstResult();
+        return query.getSingleResult().intValue();
     }
     
     @Override
     public int getNumReservationsForClient(String clientName) {
         String queryString = "SELECT COUNT(r) FROM Reservation r WHERE r.carRenter = :clientName";
-        TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
         query.setParameter("clientName", clientName);
-        return query.getFirstResult();
+        return query.getSingleResult().intValue();
     }
     
     @Override
