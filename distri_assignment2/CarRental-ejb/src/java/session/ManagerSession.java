@@ -29,7 +29,11 @@ public class ManagerSession implements ManagerSessionRemote {
     @Override
     public Set<CarType> getCarTypes(String company) {
         try {
-            return new HashSet<CarType>(RentalStore.getRental(company).getAllTypes());
+            CarRentalCompany companyEn = em.find(CarRentalCompany.class, company);
+            if (companyEn == null) {
+                this.throwCompanyNotFoundException(company);
+            }
+            return companyEn.getAllTypes();
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -40,9 +44,16 @@ public class ManagerSession implements ManagerSessionRemote {
     public Set<Integer> getCarIds(String company, String type) {
         Set<Integer> out = new HashSet<Integer>();
         try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
+            CarRentalCompany companyEn = em.find(CarRentalCompany.class, company);
+            if (companyEn == null) {
+                this.throwCompanyNotFoundException(company);
+            }
+            for (Car c : companyEn.getCars()) {
                 out.add(c.getId());
             }
+            /*for(Car c: RentalStore.getRental(company).getCars(type)){
+                out.add(c.getId());
+            }*/
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -53,7 +64,15 @@ public class ManagerSession implements ManagerSessionRemote {
     @Override
     public int getNumberOfReservations(String company, String type, int id) {
         try {
-            return RentalStore.getRental(company).getCar(id).getReservations().size();
+            String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
+                    + " r.rentalCompany = :company AND r.carType = :type AND"
+                    + " r.carId = :id";
+            TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+            query.setParameter("company", company);
+            query.setParameter("type", type);
+            query.setParameter("id", id);
+            return query.getFirstResult();
+            //return RentalStore.getRental(company).getCar(id).getReservations().size();
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
@@ -62,25 +81,28 @@ public class ManagerSession implements ManagerSessionRemote {
 
     @Override
     public int getNumberOfReservations(String company, String type) {
-        Set<Reservation> out = new HashSet<Reservation>();
         try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
+            String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
+                    + " r.carType = :type AND r.rentalCompany = :company";
+            TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+            query.setParameter("type", type);
+            query.setParameter("company", company);
+            return query.getFirstResult();
+            /*for(Car c: RentalStore.getRental(company).getCars(type)){
                 out.addAll(c.getReservations());
-            }
+            }*/
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
         }
-        return out.size();
     }
 
     @Override
     public int getNumberOfReservationsBy(String renter) {
-        Set<Reservation> out = new HashSet<Reservation>();
-        for(CarRentalCompany crc : RentalStore.getRentals().values()) {
-            out.addAll(crc.getReservationsBy(renter));
-        }
-        return out.size();
+        String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
+                + " r.carRenter = :renter";
+        TypedQuery<Integer> query = em.createQuery(queryString, Integer.class);
+        return query.getFirstResult();
     }
     
     @Override
@@ -100,7 +122,7 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @Override
     public void addCarRentalCompany(String name, List<? extends ICar> cars) {
-        CarRentalCompany company = new CarRentalCompany(name, (List<Car>) cars);
+        CarRentalCompany company = new CarRentalCompany(name, (List<Car>) cars, em);
         em.persist(company);
     }
     

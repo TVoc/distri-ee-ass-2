@@ -30,6 +30,10 @@ public class Reservation extends Quote {
     	return carId;
     }
     
+    public void setCarId(int id) {
+        this.carId = id;
+    }
+    
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     public long getId() {

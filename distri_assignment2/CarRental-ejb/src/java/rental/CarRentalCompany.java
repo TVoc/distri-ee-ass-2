@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javax.persistence.CascadeType.PERSIST;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -19,18 +20,15 @@ import rental.interfaces.ICarRentalCompany;
 @Entity
 public class CarRentalCompany implements Serializable, ICarRentalCompany {    
     
-    @PersistenceContext(unitName="CarRental-ejbPU")
-    private EntityManager em;
-    
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
     
     @Id
     private String name;
     
-    @OneToMany
+    @OneToMany(cascade=PERSIST)
     private List<Car> cars;
     
-    @OneToMany
+    @OneToMany(cascade=PERSIST)
     private Set<CarType> carTypes = new HashSet<CarType>();
 
     /***************
@@ -39,7 +37,7 @@ public class CarRentalCompany implements Serializable, ICarRentalCompany {
     public CarRentalCompany() {
     }
     
-    public CarRentalCompany(String name, List<Car> cars) {
+    public CarRentalCompany(String name, List<Car> cars, EntityManager em) {
         logger.log(Level.INFO, "<{0}> Car Rental Company {0} starting up...", name);
         setName(name);
         this.cars = cars;

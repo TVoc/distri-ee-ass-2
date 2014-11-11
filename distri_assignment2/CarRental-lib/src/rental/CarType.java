@@ -60,11 +60,19 @@ public class CarType implements Serializable {
         return nbOfSeats;
     }
     
+    public void setNbOfSeats(int num) {
+        this.nbOfSeats = num;
+    }
+    
     private int nbOfSeats;
     
     //--------------------------------------------------------------------------
     public boolean isSmokingAllowed() {
         return smokingAllowed;
+    }
+    
+    public void setSmokingAllowed(boolean allowed) {
+        this.smokingAllowed = allowed;
     }
     
     private boolean smokingAllowed;
@@ -74,11 +82,19 @@ public class CarType implements Serializable {
         return rentalPricePerDay;
     }
     
+    public void setRentalPricePerDay(double price) {
+        this.rentalPricePerDay = price;
+    }
+    
     private double rentalPricePerDay;
     
     //--------------------------------------------------------------------------
     public float getTrunkSpace() {
     	return trunkSpace;
+    }
+    
+    public void setTrunkSpace(float space) {
+        this.trunkSpace = space;
     }
     
     //trunk space in liters

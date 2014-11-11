@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import static javax.persistence.CascadeType.PERSIST;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -67,6 +68,10 @@ public class Car implements ICar, Serializable {
     public CarType getType() {
         return type;
     }
+    
+    public void setType(CarType type) {
+        this.type = type;
+    }
 
     /****************
      * RESERVATIONS *
@@ -96,7 +101,7 @@ public class Car implements ICar, Serializable {
         reservations.remove(reservation);
     }
 
-    @OneToMany
+    @OneToMany(cascade=PERSIST)
     public Set<Reservation> getReservations() {
         return reservations;
     }

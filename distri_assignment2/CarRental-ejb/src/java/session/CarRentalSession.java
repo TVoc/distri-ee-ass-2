@@ -42,7 +42,7 @@ public class CarRentalSession implements CarRentalSessionRemote {
     @Override
     public List<CarType> getAvailableCarTypes(Date start, Date end) {
         String queryString = "SELECT t FROM CarType t WHERE NOT EXISTS"
-                + " (SELECT r FROM Reservation r WHERE r.carType = t AND NOT"
+                + " (SELECT r FROM Reservation r WHERE r.carType = t.name AND NOT"
                 + " (:end <= r.startDate OR :start >= r.endDate))";
         TypedQuery<CarType> query = em.createQuery(queryString, CarType.class);
         query.setParameter("start", start, TemporalType.DATE);

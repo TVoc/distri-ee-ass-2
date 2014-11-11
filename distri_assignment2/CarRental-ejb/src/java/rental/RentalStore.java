@@ -13,9 +13,13 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 
 public class RentalStore {
 
+    @PersistenceContext
+    private static EntityManager em;
+    
     private static Map<String, CarRentalCompany> rentals;
 
     public static CarRentalCompany getRental(String company) throws IllegalArgumentException {
@@ -39,7 +43,7 @@ public class RentalStore {
         Logger.getLogger(RentalStore.class.getName()).log(Level.INFO, "loading {0} from file {1}", new Object[]{name, datafile});
         try {
             List<Car> cars = loadData(datafile);
-            CarRentalCompany company = new CarRentalCompany(name, cars);
+            CarRentalCompany company = new CarRentalCompany(name, cars, em);
             rentals.put(name, company);
         } catch (NumberFormatException ex) {
             Logger.getLogger(RentalStore.class.getName()).log(Level.SEVERE, "bad file", ex);
