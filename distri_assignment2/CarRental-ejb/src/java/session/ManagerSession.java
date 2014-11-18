@@ -12,6 +12,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
@@ -124,7 +125,13 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @Override
     public void addCarRentalCompany(String name, List<? extends ICar> cars) {
-        CarRentalCompany company = new CarRentalCompany(name, (List<Car>) cars, em);
+        CarRentalCompany company = new CarRentalCompany(name, (List<Car>) cars);
+        
+        for (ICar car : cars) {
+            em.merge(car.getType());
+            em.persist(car);
+        }
+        
         em.persist(company);
     }
     

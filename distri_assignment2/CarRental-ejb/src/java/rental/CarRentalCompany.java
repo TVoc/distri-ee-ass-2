@@ -69,14 +69,13 @@ public class CarRentalCompany implements Serializable, ICarRentalCompany {
     public CarRentalCompany() {
     }
     
-    public CarRentalCompany(String name, List<Car> cars, EntityManager em) {
+    public CarRentalCompany(String name, List<Car> cars) {
         logger.log(Level.INFO, "<{0}> Car Rental Company {0} starting up...", name);
         setName(name);
         this.cars = cars;
+        
         for (Car car : cars) {
             carTypes.add(car.getType());
-            em.merge(car.getType());
-            em.persist(car);
         }
     }
 
