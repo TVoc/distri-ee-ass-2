@@ -64,10 +64,9 @@ public class ManagerSession implements ManagerSessionRemote {
     @Override
     public int getNumberOfReservations(String company, String type, int id) {
         try {
-            String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
-                    + " r.rentalCompany = :company AND r.carType = :type AND"
-                    + " r.carId = :id";
-            TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(
+                    "CarRentalCompany.numberOfReservationsId",
+                    Long.class);
             query.setParameter("company", company);
             query.setParameter("type", type);
             query.setParameter("id", id);
@@ -82,9 +81,9 @@ public class ManagerSession implements ManagerSessionRemote {
     @Override
     public int getNumberOfReservations(String company, String type) {
         try {
-            String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
-                    + " r.carType = :type AND r.rentalCompany = :company";
-            TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+            TypedQuery<Long> query = em.createNamedQuery(
+                    "CarRentalCompany.numberOfReservations", 
+                    Long.class);
             query.setParameter("type", type);
             query.setParameter("company", company);
             return query.getSingleResult().intValue();
@@ -99,16 +98,18 @@ public class ManagerSession implements ManagerSessionRemote {
 
     @Override
     public int getNumberOfReservationsBy(String renter) {
-        String queryString = "SELECT COUNT(r) FROM Reservation r WHERE"
-                + " r.carRenter = :renter";
-        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+        TypedQuery<Long> query = em.createNamedQuery(
+                "Reservation.reservationsByClient", 
+                Long.class);
         query.setParameter("renter", renter);
         return query.getSingleResult().intValue();
     }
     
     @Override
     public List<CarRentalCompany> getAllCompanies() {
-        TypedQuery<CarRentalCompany> query = em.createQuery("SELECT c FROM CarRentalCompany c", CarRentalCompany.class);
+        TypedQuery<CarRentalCompany> query = em.createNamedQuery(
+                "CarRentalCompany.getAllCompanies", 
+                CarRentalCompany.class);
         return query.getResultList();
     }
     
@@ -129,8 +130,9 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @Override
     public int getNumReservationsForType(String company, String type) {
-        String queryString = "SELECT COUNT(r) FROM Reservation r WHERE r.rentalCompany = :company AND r.carType = :type";
-        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+        TypedQuery<Long> query = em.createNamedQuery(
+                "CarRentalCompany.numberOfReservationsType", 
+                Long.class);
         query.setParameter("company", company);
         query.setParameter("type", type);
         return query.getSingleResult().intValue();
@@ -138,16 +140,18 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @Override
     public int getNumReservationsForClient(String clientName) {
-        String queryString = "SELECT COUNT(r) FROM Reservation r WHERE r.carRenter = :clientName";
-        TypedQuery<Long> query = em.createQuery(queryString, Long.class);
+        TypedQuery<Long> query = em.createNamedQuery(
+                "CarRentalCompany.numberOfReservationsClient", 
+                Long.class);
         query.setParameter("clientName", clientName);
         return query.getSingleResult().intValue();
     }
     
     @Override
     public Set<String> getBestClients() {
-        String clientRetrievalString = "SELECT DISTINCT r.carRenter FROM Reservation r";
-        TypedQuery<String> query = em.createQuery(clientRetrievalString, String.class);
+        TypedQuery<String> query = em.createNamedQuery(
+                "Reservation.bestClients", 
+                String.class);
         List<String> clients = query.getResultList();
         
         Set<String> bestClients = new HashSet<String>();

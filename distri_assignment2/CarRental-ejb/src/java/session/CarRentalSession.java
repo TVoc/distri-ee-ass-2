@@ -34,23 +34,24 @@ public class CarRentalSession implements CarRentalSessionRemote {
 
     @Override
     public Set<String> getAllRentalCompanies() {
-        String queryString = "SELECT c.name FROM CarRentalCompany c";
-        TypedQuery<String> query = em.createQuery(queryString, String.class);
+        TypedQuery<String> query = em.createNamedQuery(
+                "CarRentalCompany.getAllcompaniesName", 
+                String.class);
         return new HashSet<String>(query.getResultList());
     }
     
     @Override
     public List<CarType> getAvailableCarTypes(Date start, Date end) {
-        String companyQString = "SELECT c FROM CarRentalCompany c";
-        TypedQuery<CarRentalCompany> cQuery = em.createQuery(companyQString, CarRentalCompany.class);
+        TypedQuery<CarRentalCompany> cQuery = em.createNamedQuery(
+                "CarRentalCompany.getAllCompanies", 
+                CarRentalCompany.class);
         List<CarRentalCompany> companies = cQuery.getResultList();
         
         List<CarType> toReturn = new ArrayList<CarType>();
         
         for (CarRentalCompany company : companies) {
-            String queryString = "SELECT t FROM CarType t WHERE EXISTS (SELECT comp FROM CarRentalCompany comp WHERE comp = :company AND t MEMBER OF comp.carTypes AND EXISTS"
-                    + " (SELECT c FROM Car c WHERE c MEMBER OF comp.cars AND c.type = t AND NOT EXISTS (SELECT r FROM Reservation r WHERE r.carId = c.id AND (:start < r.endDate OR :end > r.startDate))))";
-            TypedQuery<CarType> query = em.createQuery(queryString, CarType.class);
+            TypedQuery<CarType> query = em.createNamedQuery(
+                    "CarType.beastMode", CarType.class);
             query.setParameter("start", start, TemporalType.DATE);
             query.setParameter("end", end, TemporalType.DATE);
             query.setParameter("company", company);

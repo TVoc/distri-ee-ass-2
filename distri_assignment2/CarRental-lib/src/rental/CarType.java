@@ -5,8 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name  = "CarType.beastMode",
+                query = "SELECT t FROM CarType t WHERE EXISTS" 
+                      + " (SELECT comp FROM CarRentalCompany comp WHERE " 
+                      + "  comp = :company AND t MEMBER OF comp.carTypes AND"
+                      + " EXISTS (SELECT c FROM Car c WHERE c"
+                      + " MEMBER OF comp.cars AND c.type = t AND"
+                      + " NOT EXISTS (SELECT r FROM Reservation r WHERE"
+                      + " r.carId = c.id AND (:start < r.endDate OR :end > r.startDate))))")
+})
 public class CarType implements Serializable {    
     //--------------------------------------------------------------------------
     // Constructor

@@ -12,12 +12,44 @@ import static javax.persistence.CascadeType.PERSIST;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import rental.interfaces.ICarRentalCompany;
 
 
 @Entity
+@NamedQueries({
+    // -------------------------------------------------------------------------
+    // General Queries.
+    // -------------------------------------------------------------------------
+    @NamedQuery(name  = "CarRentalCompany.getAllCompanies",
+                query = "SELECT c FROM CarRentalCompany c"),
+    @NamedQuery(name  = "CarRentalCompany.getAllcompaniesName",
+                query = "Select c.name From CarRentalCompany c"),
+    // -------------------------------------------------------------------------
+    // Manager Session Queries
+    //--------------------------------------------------------------------------
+    @NamedQuery(name  = "CarRentalCompany.numberOfReservationsId", 
+                query = "SELECT COUNT(r) FROM Reservation r WHERE"
+                      + " r.rentalCompany = :company AND r.carType = :type AND"
+                      + " r.carId = :id"),
+    @NamedQuery(name  = "CarRentalCompany.numberOfReservations",
+                query = "SELECT COUNT(r) FROM Reservation r WHERE"
+                      + " r.carType = :type AND r.rentalCompany = :company"),
+    @NamedQuery(name  = "CarRentalCompany.numberOfReservationsType",
+                query = "SELECT COUNT(r) FROM Reservation r WHERE" 
+                      + " r.rentalCompany = :company AND r.carType = :type"),
+    @NamedQuery(name  = "CarRentalCompany.numberOfReservationsClient",
+                query = "SELECT COUNT(r) FROM Reservation r WHERE"
+                      + " r.carRenter = :clientName"),
+    // -------------------------------------------------------------------------
+    // CarRental Session Queries
+    // -------------------------------------------------------------------------
+    @NamedQuery(name  = "CarRentalCompany.availableCarTypes",
+                query = "SELECT c FROM CarRentalCompany c")
+})
 public class CarRentalCompany implements Serializable, ICarRentalCompany {    
     
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());

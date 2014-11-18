@@ -4,8 +4,17 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.NamedQueries;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name  = "Reservation.bestClients",
+                query = "SELECT DISTINCT r.carRenter FROM Reservation r"),
+    @NamedQuery(name  = "Reservation.reservationsByClient",
+                query = "SELECT COUNT(r) FROM Reservation r WHERE"
+                      + " r.carRenter = :renter")
+})
 public class Reservation extends Quote {
     private int carId;
     
